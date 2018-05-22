@@ -1,0 +1,325 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Keyboard movement</title>
+<body>
+<script src="pixi/pixi.min.js"></script>
+<script>
+
+//Aliases
+let Application = PIXI.Application,
+    Container = PIXI.Container,
+    loader = PIXI.loader,
+    resources = PIXI.loader.resources,
+    TextureCache = PIXI.utils.TextureCache,
+    Sprite = PIXI.Sprite;
+
+//Create a Pixi Application
+let app = new Application({ 
+    width: 600,
+    height: 600,
+    antialiasing: true, 
+    transparent: false, 
+    resolution: 1
+  }
+);
+
+//Add the canvas that Pixi automatically created for you to the HTML document
+document.body.appendChild(app.view);
+
+loader
+  .add("examples/images/cat.png")
+  .load(setup);
+
+//Define any variables that are used in more than one function
+var cat, state;
+
+function setup() {
+//Create the box
+    box = new PIXI.Graphics();
+    box.beginFill(0xCCFF99);
+    box.drawRect(0, 0, 64, 64);
+    box.endFill();
+    box.x = 400;
+    box.y = 500;
+    box.vx = -1;
+    box.vy = 0;
+
+    app.stage.addChild(box);
+
+    //Create the second box
+    box2 = new PIXI.Graphics();
+    box2.beginFill(0xCCFF99);
+    box2.drawRect(0, 0, 64, 64);
+    box2.endFill();
+    box2.x = 200;
+    box2.y = 200;
+    box2.vx = 0.3;
+    box2.vy = 1;
+
+    app.stage.addChild(box2);
+//Create the third box
+    box3 = new PIXI.Graphics();
+    box3.beginFill(0xCCFF99);
+    box3.drawRect(0, 0, 64, 64);
+    box3.endFill();
+    box3.x = 100;
+    box3.y = 350;
+    box3.vx = 0;
+    box3.vy = 0.7;
+
+    app.stage.addChild(box3);
+//Create the fourth box
+    box4 = new PIXI.Graphics();
+    box4.beginFill(0xCCFF99);
+    box4.drawRect(0, 0, 64, 64);
+    box4.endFill();
+    box4.x = 450;
+    box4.y = 100;
+    box4.vx = -1;
+    box4.vy = 0;
+
+    app.stage.addChild(box4);
+    //Create the `cat` sprite
+  cat = new Sprite(resources["examples/images/cat.png"].texture);
+  cat.y = 96; 
+  cat.vx = 0;
+  cat.vy = 0;
+  app.stage.addChild(cat);
+
+  //Capture the keyboard arrow keys
+  let left = keyboard(37),
+      up = keyboard(38),
+      right = keyboard(39),
+      down = keyboard(40);
+
+  //Left arrow key `press` method
+  left.press = () => {
+    //Change the cat's velocity when the key is pressed
+    cat.vx = -5;
+    cat.vy = 0;
+  };
+  
+  //Left arrow key `release` method
+  left.release = () => {
+    //If the left arrow has been released, and the right arrow isn't down,
+    //and the cat isn't moving vertically:
+    //Stop the cat
+    if (!right.isDown && cat.vy === 0) {
+      cat.vx = 0;
+    }
+  };
+
+  //Up
+  up.press = () => {
+    cat.vy = -5;
+    cat.vx = 0;
+  };
+  up.release = () => {
+    if (!down.isDown && cat.vx === 0) {
+      cat.vy = 0;
+    }
+  };
+
+  //Right
+  right.press = () => {
+    cat.vx = 5;
+    cat.vy = 0;
+  };
+  right.release = () => {
+    if (!left.isDown && cat.vy === 0) {
+      cat.vx = 0;
+    }
+  };
+
+  //Down
+  down.press = () => {
+    cat.vy = 5;
+    cat.vx = 0;
+  };
+  down.release = () => {
+    if (!up.isDown && cat.vx === 0) {
+      cat.vy = 0;
+    }
+  };
+
+  //Set the game state
+  state = play;
+ 
+  //Start the game loop 
+  app.ticker.add(delta => gameLoop(delta));
+}
+
+function gameLoop(delta){
+
+  //Update the current game state:
+  state(delta);
+}
+
+function play(delta) {
+
+  //Use the cat's velocity to make it move
+  cat.x += cat.vx;
+  cat.y += cat.vy;
+  // Use the box's velocity to make it move
+    box.x += box.vx;
+    box.y += box.vy;
+    box2.x += box2.vx;
+    box2.y += box2.vy;
+    box3.x += box3.vx;
+    box3.y += box3.vy;
+    box4.x += box4.vx;
+    box4.y += box4.vy;
+//check for a collision between the cat and the box
+    if (hitTestRectangle(cat, box)) {
+
+        //if there's a collision, change the message text
+        //and tint the box red
+        //message.text = "hit!";
+        box.tint = 0xff3300;
+
+    } else {
+
+        //if there's no collision, reset the message
+        //text and the box's color
+        //message.text = "No collision...";
+        box.tint = 0xccff99;
+    }
+    //check for a collision between the cat and the box2
+    if (hitTestRectangle(cat, box2)) {
+
+        //if there's a collision, change the message text
+        //and tint the box red
+        // message.text = "hit!";
+        box2.tint = 0xff3300;
+    } else {
+
+        //if there's no collision, reset the message
+        //text and the box's color
+        //message.text = "No collision...";
+        box2.tint = 0xccff99;
+    }
+    // Collision between cat and box 3
+    if (hitTestRectangle(cat, box3)) {
+
+        //if there's a collision, change the message text
+        //and tint the box red
+        // message.text = "hit!";
+        box3.tint = 0xff3300;
+    } else {
+
+        //if there's no collision, reset the message
+        //text and the box's color
+        //message.text = "No collision...";
+        box3.tint = 0xccff99;
+    }
+    // Collision between cat and box 4
+    if (hitTestRectangle(cat, box4)) {
+
+        //if there's a collision, change the message text
+        //and tint the box red
+        // message.text = "hit!";
+        box4.tint = 0xff3300;
+    } else {
+
+        //if there's no collision, reset the message
+        //text and the box's color
+        //message.text = "No collision...";
+        box4.tint = 0xccff99;
+    }
+}
+//The `hitTestRectangle` function
+function hitTestRectangle(r1, r2) {
+
+    //Define the variables we'll need to calculate
+    let hit, combinedHalfWidths, combinedHalfHeights, vx, vy;
+
+    //hit will determine whether there's a collision
+    hit = false;
+
+    //Find the center points of each sprite
+    r1.centerX = r1.x + r1.width / 2;
+    r1.centerY = r1.y + r1.height / 2;
+    r2.centerX = r2.x + r2.width / 2;
+    r2.centerY = r2.y + r2.height / 2;
+
+    //Find the half-widths and half-heights of each sprite
+    r1.halfWidth = r1.width / 2;
+    r1.halfHeight = r1.height / 2;
+    r2.halfWidth = r2.width / 2;
+    r2.halfHeight = r2.height / 2;
+
+    //Calculate the distance vector between the sprites
+    vx = r1.centerX - r2.centerX;
+    vy = r1.centerY - r2.centerY;
+
+    //Figure out the combined half-widths and half-heights
+    combinedHalfWidths = r1.halfWidth + r2.halfWidth;
+    combinedHalfHeights = r1.halfHeight + r2.halfHeight;
+
+    //Check for a collision on the x axis
+    if (Math.abs(vx) < combinedHalfWidths) {
+
+        //A collision might be occuring. Check for a collision on the y axis
+        if (Math.abs(vy) < combinedHalfHeights) {
+
+            //There's definitely a collision happening
+            hit = true;
+        } else {
+
+            //There's no collision on the y axis
+            hit = false;
+        }
+    } else {
+
+        //There's no collision on the x axis
+        hit = false;
+    }
+
+    //`hit` will be either `true` or `false`
+    return hit;
+};
+
+//The `keyboard` helper function
+function keyboard(keyCode) {
+  var key = {};
+  key.code = keyCode;
+  key.isDown = false;
+  key.isUp = true;
+  key.press = undefined;
+  key.release = undefined;
+  //The `downHandler`
+  key.downHandler = event => {
+    if (event.keyCode === key.code) {
+      if (key.isUp && key.press) key.press();
+      key.isDown = true;
+      key.isUp = false;
+    }
+    event.preventDefault();
+  };
+
+  //The `upHandler`
+  key.upHandler = event => {
+    if (event.keyCode === key.code) {
+      if (key.isDown && key.release) key.release();
+      key.isDown = false;
+      key.isUp = true;
+    }
+    event.preventDefault();
+  };
+
+  //Attach event listeners
+  window.addEventListener(
+    "keydown", key.downHandler.bind(key), false
+  );
+  window.addEventListener(
+    "keyup", key.upHandler.bind(key), false
+  );
+  return key;
+}
+
+</script>
+</body>
+
+
+
+

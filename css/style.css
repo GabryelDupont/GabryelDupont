@@ -1,0 +1,19 @@
+.textblack{
+    color:black;
+}
+@media print {
+    #baspage , #menu {
+        display: none;
+    }
+}
+@media screen and   (max-width: 420px) {
+    #baspage {
+        display: none;
+    }
+
+}
+@media screen and (min-width:421px) and (max-width: 1024px) {
+    #menu {
+        display: none;
+    }
+}
